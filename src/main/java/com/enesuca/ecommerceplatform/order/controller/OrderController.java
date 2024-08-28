@@ -1,44 +1,52 @@
 package com.enesuca.ecommerceplatform.order.controller;
 
 import com.enesuca.ecommerceplatform.order.model.Order;
-import com.enesuca.ecommerceplatform.order.service.OrderService;
+import com.enesuca.ecommerceplatform.order.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/orders")
 public class OrderController {
 
     @Autowired
-    private OrderService orderService;
+    private OrderRepository orderRepository;
 
     @GetMapping
     public List<Order> getAllOrders() {
-        return orderService.getAllOrders();
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<Order> getOrderById(@PathVariable Long id) {
-        Optional<Order> order = orderService.getOrderById(id);
-        return order.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        return orderRepository.findAll();
     }
 
     @PostMapping
     public Order createOrder(@RequestBody Order order) {
-        return orderService.createOrder(order);
+        return orderRepository.save(order);
+    }
+
+    @GetMapping("/{id}")
+    public Order getOrderById(@PathVariable Long id) {
+        return orderRepository.findById(id).orElse(null);
+    }
+
+    @PutMapping("/{id}")
+    public Order updateOrder(@PathVariable Long id, @RequestBody Order order) {
+        if (orderRepository.existsById(id)) {
+            order.setId(id);
+            return orderRepository.save(order);
+        }
+        return null;
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
-        orderService.deleteOrder(id);
-        return ResponseEntity.noContent().build();
+    public void deleteOrder(@PathVariable Long id) {
+        orderRepository.deleteById(id);
     }
-    @GetMapping
+
+    // Root endpoint
+    @GetMapping("/root")
     public String rootEndpoint() {
-        return "Welcome to the Order API";
+        return "Order service is running!";
     }
+
 }
