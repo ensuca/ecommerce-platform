@@ -21,4 +21,8 @@ public class UserController {
     public User findUserByUsername(@RequestParam String username) {
         return userService.findByUsername(username).orElse(null);
     }
+    @GetMapping
+    public String rootEndpoint() {
+        return "Welcome to the User API";
+    }
 }

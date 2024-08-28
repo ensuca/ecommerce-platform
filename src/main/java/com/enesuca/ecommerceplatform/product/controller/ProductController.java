@@ -38,4 +38,8 @@ public class ProductController {
     public void deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);
     }
+    @GetMapping
+    public String rootEndpoint() {
+        return "Welcome to the Products API";
+    }
 }
