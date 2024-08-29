@@ -1,46 +1,44 @@
 package com.enesuca.ecommerceplatform.order_.controller;
 
 import com.enesuca.ecommerceplatform.order_.model.Order_;
-import com.enesuca.ecommerceplatform.order_.repository.OrderRepository;
+import com.enesuca.ecommerceplatform.order_.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/orders")
+@RequestMapping("/orders")
 public class OrderController {
 
     @Autowired
-    private OrderRepository orderRepository;
+    private OrderService orderService;
 
     @GetMapping
     public List<Order_> getAllOrders() {
-        return orderRepository.findAll();
+        return orderService.getAllOrders();
     }
 
     @PostMapping
     public Order_ createOrder(@RequestBody Order_ order) {
-        return orderRepository.save(order);
+        return orderService.createOrder(order);
     }
 
     @GetMapping("/{id}")
     public Order_ getOrderById(@PathVariable Long id) {
-        return orderRepository.findById(id).orElse(null);
+        Optional<Order_> order = orderService.getOrderById(id);
+        return order.orElse(null);
     }
 
     @PutMapping("/{id}")
     public Order_ updateOrder(@PathVariable Long id, @RequestBody Order_ order) {
-        if (orderRepository.existsById(id)) {
-            order.setId(id);
-            return orderRepository.save(order);
-        }
-        return null;
+        return orderService.updateOrder(id, order);
     }
 
     @DeleteMapping("/{id}")
     public void deleteOrder(@PathVariable Long id) {
-        orderRepository.deleteById(id);
+        orderService.deleteOrder(id);
     }
 
     // Root endpoint
@@ -48,5 +46,4 @@ public class OrderController {
     public String rootEndpoint() {
         return "Order service is running!";
     }
-
 }

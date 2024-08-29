@@ -26,6 +26,14 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
+    public Order_ updateOrder(Long id, Order_ order) {
+        if (orderRepository.existsById(id)) {
+            order.setId(id);
+            return orderRepository.save(order);
+        }
+        return null;
+    }
+
     public void deleteOrder(Long id) {
         orderRepository.deleteById(id);
     }
