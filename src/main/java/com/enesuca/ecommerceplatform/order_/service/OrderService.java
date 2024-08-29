@@ -1,6 +1,8 @@
 package com.enesuca.ecommerceplatform.order_.service;
 
 import com.enesuca.ecommerceplatform.order_.model.Order_;
+import com.enesuca.ecommerceplatform.order_.model.OrderItem;
+import com.enesuca.ecommerceplatform.order_.repository.OrderItemRepository;
 import com.enesuca.ecommerceplatform.order_.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,6 +16,9 @@ public class OrderService {
     @Autowired
     private OrderRepository orderRepository;
 
+    @Autowired
+    private OrderItemRepository orderItemRepository;
+
     public List<Order_> getAllOrders() {
         return orderRepository.findAll();
     }
@@ -22,8 +27,15 @@ public class OrderService {
         return orderRepository.findById(id);
     }
 
-    public Order_ createOrder(Order_ order) {
-        return orderRepository.save(order);
+    public Order_ createOrder(Order_ order, List<OrderItem> orderItems) {
+        Order_ savedOrder = orderRepository.save(order);
+
+        for (OrderItem item : orderItems) {
+            item.setOrderId(savedOrder.getId()); // setOrderId kullanımı
+            orderItemRepository.save(item);
+        }
+
+        return savedOrder;
     }
 
     public Order_ updateOrder(Long id, Order_ order) {
@@ -35,6 +47,9 @@ public class OrderService {
     }
 
     public void deleteOrder(Long id) {
+        List<OrderItem> orderItems = orderItemRepository.findByOrderId(id);
+        orderItemRepository.deleteAll(orderItems);
+
         orderRepository.deleteById(id);
     }
 }
