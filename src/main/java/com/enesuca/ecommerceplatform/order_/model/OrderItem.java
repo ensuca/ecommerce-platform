@@ -1,35 +1,35 @@
-package com.enesuca.ecommerceplatform.order.model;
+package com.enesuca.ecommerceplatform.order_.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import java.time.LocalDateTime;
+import jakarta.persistence.ManyToOne;
 
 @Entity
-public class Order {
+public class OrderItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long userId;
     private Long productId;
     private Integer quantity;
-    private LocalDateTime orderDate;
-    private String status;
+    private Double price;
+
+    @ManyToOne
+    private Order_ order;
 
     // Default constructor
-    public Order() {
+    public OrderItem() {
     }
 
     // Parameterized constructor
-    public Order(Long userId, Long productId, Integer quantity, LocalDateTime orderDate, String status) {
-        this.userId = userId;
+    public OrderItem(Long productId, Integer quantity, Double price, Order_ order) {
         this.productId = productId;
         this.quantity = quantity;
-        this.orderDate = orderDate;
-        this.status = status;
+        this.price = price;
+        this.order = order;
     }
 
     // Getters and Setters
@@ -39,14 +39,6 @@ public class Order {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
     }
 
     public Long getProductId() {
@@ -65,31 +57,30 @@ public class Order {
         this.quantity = quantity;
     }
 
-    public LocalDateTime getOrderDate() {
-        return orderDate;
+    public Double getPrice() {
+        return price;
     }
 
-    public void setOrderDate(LocalDateTime orderDate) {
-        this.orderDate = orderDate;
+    public void setPrice(Double price) {
+        this.price = price;
     }
 
-    public String getStatus() {
-        return status;
+    public Order_ getOrder() {
+        return order;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setOrder(Order_ order) {
+        this.order = order;
     }
 
     @Override
     public String toString() {
-        return "Order{" +
+        return "OrderItem{" +
                 "id=" + id +
-                ", userId=" + userId +
                 ", productId=" + productId +
                 ", quantity=" + quantity +
-                ", orderDate=" + orderDate +
-                ", status='" + status + '\'' +
+                ", price=" + price +
+                ", order=" + order +
                 '}';
     }
 }

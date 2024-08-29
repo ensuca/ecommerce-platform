@@ -1,7 +1,7 @@
-package com.enesuca.ecommerceplatform.order.controller;
+package com.enesuca.ecommerceplatform.order_.controller;
 
-import com.enesuca.ecommerceplatform.order.model.Order;
-import com.enesuca.ecommerceplatform.order.repository.OrderRepository;
+import com.enesuca.ecommerceplatform.order_.model.Order_;
+import com.enesuca.ecommerceplatform.order_.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,22 +15,22 @@ public class OrderController {
     private OrderRepository orderRepository;
 
     @GetMapping
-    public List<Order> getAllOrders() {
+    public List<Order_> getAllOrders() {
         return orderRepository.findAll();
     }
 
     @PostMapping
-    public Order createOrder(@RequestBody Order order) {
+    public Order_ createOrder(@RequestBody Order_ order) {
         return orderRepository.save(order);
     }
 
     @GetMapping("/{id}")
-    public Order getOrderById(@PathVariable Long id) {
+    public Order_ getOrderById(@PathVariable Long id) {
         return orderRepository.findById(id).orElse(null);
     }
 
     @PutMapping("/{id}")
-    public Order updateOrder(@PathVariable Long id, @RequestBody Order order) {
+    public Order_ updateOrder(@PathVariable Long id, @RequestBody Order_ order) {
         if (orderRepository.existsById(id)) {
             order.setId(id);
             return orderRepository.save(order);
