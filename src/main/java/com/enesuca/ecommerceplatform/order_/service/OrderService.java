@@ -52,4 +52,15 @@ public class OrderService {
 
         orderRepository.deleteById(id);
     }
+
+    public <T> Object updateOrder(long eq, T any, List<T> ts) {
+        return null;
+    }
+
+    public OrderItem addOrderItem(long l, OrderItem orderItem) {
+        return null;
+    }
+
+    public void removeOrderItem(long l, long l1) {
+    }
 }
