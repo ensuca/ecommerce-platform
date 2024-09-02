@@ -1,53 +1,61 @@
 package com.enesuca.ecommerceplatform.order_.controller;
 
 import com.enesuca.ecommerceplatform.order_.model.Order_;
-import com.enesuca.ecommerceplatform.order_.repository.OrderRepository;
+import com.enesuca.ecommerceplatform.order_.model.OrderItem;
+import com.enesuca.ecommerceplatform.order_.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
-@RequestMapping("0")
+@RequestMapping("/api/orders")
 public class OrderController {
 
+    private final OrderService orderService;
+
     @Autowired
-    private OrderRepository orderRepository;
+    public OrderController(OrderService orderService) {
+        this.orderService = orderService;
+    }
 
     @GetMapping
-    public List<Order_> getAllOrders() {
-        return orderRepository.findAll();
+    public ResponseEntity<List<Order_>> getAllOrders() {
+        List<Order_> orders = orderService.getAllOrders();
+        return ResponseEntity.ok(orders);
     }
 
     @PostMapping
-    public Order_ createOrder(@RequestBody Order_ order) {
-        return orderRepository.save(order);
+    public ResponseEntity<Order_> createOrder(@RequestBody CreateOrderRequest createOrderRequest) {
+        Order_ createdOrder = orderService.createOrder(createOrderRequest.getOrder(), createOrderRequest.getOrderItems());
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdOrder);
     }
 
     @GetMapping("/{id}")
-    public Order_ getOrderById(@PathVariable Long id) {
-        return orderRepository.findById(id).orElse(null);
+    public ResponseEntity<Order_> getOrderById(@PathVariable Long id) {
+        return orderService.getOrderById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{id}")
-    public Order_ updateOrder(@PathVariable Long id, @RequestBody Order_ order) {
-        if (orderRepository.existsById(id)) {
-            order.setId(id);
-            return orderRepository.save(order);
-        }
-        return null;
+    public ResponseEntity<Order_> updateOrder(@PathVariable Long id, @RequestBody Order_ order) {
+        Order_ updatedOrder = orderService.updateOrder(id, order);
+        return ResponseEntity.ok(updatedOrder);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteOrder(@PathVariable Long id) {
-        orderRepository.deleteById(id);
+    public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
+        orderService.deleteOrder(id);
+        return ResponseEntity.noContent().build();
     }
 
     // Root endpoint
     @GetMapping("/root")
-    public String rootEndpoint() {
-        return "Order service is running!";
+    public ResponseEntity<String> rootEndpoint() {
+        return ResponseEntity.ok("Order service is running!");
     }
-
 }
-

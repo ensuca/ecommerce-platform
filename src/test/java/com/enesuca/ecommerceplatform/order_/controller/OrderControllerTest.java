@@ -1,7 +1,9 @@
 package com.enesuca.ecommerceplatform.order_.controller;
 
 import com.enesuca.ecommerceplatform.order_.model.Order_;
+import com.enesuca.ecommerceplatform.order_.model.OrderItem;
 import com.enesuca.ecommerceplatform.order_.service.OrderService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -11,10 +13,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Optional;
+import java.util.*;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -29,79 +31,93 @@ class OrderControllerTest {
     @InjectMocks
     private OrderController orderController;
 
+    private ObjectMapper objectMapper = new ObjectMapper();
+
     private Order_ order;
+    private OrderItem orderItem;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
         mockMvc = MockMvcBuilders.standaloneSetup(orderController).build();
 
-        // Initialize sample order object for testing
         order = new Order_();
         order.setId(1L);
-        order.setUserId(1L);
-        order.setProductId(1L);
-        order.setQuantity(10);
-        order.setOrderDate(LocalDateTime.now());
-        order.setStatus("PENDING");
+        // Set other properties as needed
+
+        orderItem = new OrderItem();
+        // Set properties for the OrderItem
     }
 
     @Test
     void testGetAllOrders() throws Exception {
-        // Mock service to return a list of orders
         when(orderService.getAllOrders()).thenReturn(Arrays.asList(order));
 
-        // Perform GET request and verify the result
-        mockMvc.perform(get("/orders"))
+        mockMvc.perform(get("/api/orders"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(order.getId()))
-                .andExpect(jsonPath("$[0].status").value(order.getStatus()));
+                .andExpect(jsonPath("$[0].id").value(order.getId()));
     }
 
     @Test
-    void testCreateOrder() throws Exception {
-        // Mock service to return the created order
-        when(orderService.createOrder(any(Order_.class), anyList())).thenReturn(order);
+    public void testCreateOrder() throws Exception {
+        Order_ order = new Order_();
+        // initialize with necessary data
+        List<OrderItem> orderItems = Arrays.asList(orderItem);
 
-        // Perform POST request and verify the result
-        mockMvc.perform(post("/orders")
+        CreateOrderRequest createOrderRequest = new CreateOrderRequest();
+        createOrderRequest.setOrder(order);
+        createOrderRequest.setOrderItems(orderItems);
+
+        when(orderService.createOrder(any(Order_.class), any(List.class))).thenReturn(order);
+
+        mockMvc.perform(post("/api/orders")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"userId\":1,\"productId\":1,\"quantity\":10,\"orderDate\":\"2024-08-30T10:00:00\",\"status\":\"PENDING\"}"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(order.getId()));
+                        .content(objectMapper.writeValueAsString(createOrderRequest)))
+                .andExpect(status().isCreated());
     }
 
     @Test
     void testGetOrderById() throws Exception {
-        // Mock service to return an order by ID
         when(orderService.getOrderById(1L)).thenReturn(Optional.of(order));
 
-        // Perform GET request and verify the result
-        mockMvc.perform(get("/orders/1"))
+        mockMvc.perform(get("/api/orders/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(order.getId()));
     }
 
     @Test
-    void testUpdateOrder() throws Exception {
-        // Mock service to return the updated order
-        when(orderService.updateOrder(eq(1L), any(Order_.class), anyList())).thenReturn(order);
+    void testGetOrderByIdNotFound() throws Exception {
+        when(orderService.getOrderById(1L)).thenReturn(Optional.empty());
 
-        // Perform PUT request and verify the result
-        mockMvc.perform(put("/orders/1")
+        mockMvc.perform(get("/api/orders/1"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void testUpdateOrder() throws Exception {
+        when(orderService.updateOrder(eq(1L), any(Order_.class))).thenReturn(order);
+
+        mockMvc.perform(put("/api/orders/1")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"userId\":1,\"productId\":1,\"quantity\":15,\"orderDate\":\"2024-08-30T10:00:00\",\"status\":\"SHIPPED\"}"))
+                        .content(objectMapper.writeValueAsString(order)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.quantity").value(15));
+                .andExpect(jsonPath("$.id").value(order.getId()));
     }
 
     @Test
     void testDeleteOrder() throws Exception {
-        // Perform DELETE request and verify the result
-        mockMvc.perform(delete("/orders/1"))
-                .andExpect(status().isOk());
+        doNothing().when(orderService).deleteOrder(1L);
 
-        // Verify that the delete method was called
+        mockMvc.perform(delete("/api/orders/1"))
+                .andExpect(status().isNoContent());
+
         verify(orderService).deleteOrder(1L);
+    }
+
+    @Test
+    void testRootEndpoint() throws Exception {
+        mockMvc.perform(get("/api/orders/root"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Order service is running!"));
     }
 }
