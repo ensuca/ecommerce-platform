@@ -1,10 +1,12 @@
 package com.enesuca.ecommerceplatform.order_.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
+
 
 @Entity
 public class Order_ {
@@ -16,8 +18,14 @@ public class Order_ {
     private Long userId;
     private Long productId;
     private Integer quantity;
+
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime orderDate;
     private String status;
+
+    @OneToMany(mappedBy = "orderId", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Collection<OrderItem> orderItems = new ArrayList<>();
 
     // Default constructor
     public Order_() {
@@ -32,6 +40,8 @@ public class Order_ {
         this.status = status;
     }
 
+
+
     // Getters and Setters
     public Long getId() {
         return id;
@@ -41,45 +51,40 @@ public class Order_ {
         this.id = id;
     }
 
-    public Long getUserId() {
-        return userId;
-    }
-
     public void setUserId(Long userId) {
         this.userId = userId;
     }
 
-    public Long getProductId() {
-        return productId;
-    }
 
     public void setProductId(Long productId) {
         this.productId = productId;
+    }
+
+
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
+    }
+
+
+    public void setOrderDate(LocalDateTime orderDate) {
+        this.orderDate = orderDate;
+    }
+
+
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public Collection<OrderItem> getOrderItems() {
+        return orderItems;
     }
 
     public Integer getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
-    }
 
-    public LocalDateTime getOrderDate() {
-        return orderDate;
-    }
-
-    public void setOrderDate(LocalDateTime orderDate) {
-        this.orderDate = orderDate;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
 
     @Override
     public String toString() {
@@ -90,6 +95,12 @@ public class Order_ {
                 ", quantity=" + quantity +
                 ", orderDate=" + orderDate +
                 ", status='" + status + '\'' +
+                ", orderItems=" + orderItems +
                 '}';
+    }
+
+
+
+    public <E> void setOrderItems(ArrayList<E> es) {
     }
 }

@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import org.antlr.v4.runtime.misc.NotNull;
 
 @Entity
 public class Product {
@@ -12,12 +13,20 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull
+
     private String name;
+
+
     private String description;
+
+    @NotNull
     private Double price;
+
+    @NotNull
     private Integer quantity;
 
-    // Getter ve Setter metodları
+    // Getters and Setters
     public Long getId() {
         return id;
     }

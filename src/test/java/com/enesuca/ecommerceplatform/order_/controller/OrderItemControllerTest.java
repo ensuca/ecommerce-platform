@@ -49,7 +49,7 @@ class OrderItemControllerTest {
         when(orderItemService.getAllOrderItems()).thenReturn(Arrays.asList(orderItem));
 
         // Perform GET request and verify the result
-        mockMvc.perform(get("/order-items"))
+        mockMvc.perform(get("/api/order-items"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(orderItem.getId()));
     }
@@ -60,10 +60,10 @@ class OrderItemControllerTest {
         when(orderItemService.createOrderItem(any(OrderItem.class))).thenReturn(orderItem);
 
         // Perform POST request and verify the result
-        mockMvc.perform(post("/order-items")
+        mockMvc.perform(post("/api/order-items")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"orderId\":1,\"productId\":1,\"quantity\":5}"))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())  // 201 yerine 200 kullanmışsınız, fakat doğru olanı 201'dir
                 .andExpect(jsonPath("$.id").value(orderItem.getId()));
     }
 
@@ -73,7 +73,7 @@ class OrderItemControllerTest {
         when(orderItemService.getOrderItemById(1L)).thenReturn(Optional.of(orderItem));
 
         // Perform GET request and verify the result
-        mockMvc.perform(get("/order-items/1"))
+        mockMvc.perform(get("/api/order-items/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(orderItem.getId()));
     }
@@ -81,23 +81,31 @@ class OrderItemControllerTest {
     @Test
     void testUpdateOrderItem() throws Exception {
         // Mock service to return the updated order item
+        orderItem.setQuantity(10);
         when(orderItemService.updateOrderItem(eq(1L), any(OrderItem.class))).thenReturn(orderItem);
 
         // Perform PUT request and verify the result
-        mockMvc.perform(put("/order-items/1")
+        mockMvc.perform(put("/api/order-items/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"orderId\":1,\"productId\":1,\"quantity\":10}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.quantity").value(10));
+
+        // Mock service to return null when order item is not found
+        when(orderItemService.updateOrderItem(eq(2L), any(OrderItem.class))).thenReturn(null);
+
+        // Perform PUT request for a non-existent order item and verify the result
+        mockMvc.perform(put("/api/order-items/2")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"orderId\":2,\"productId\":2,\"quantity\":20}"))
+                .andExpect(status().isNotFound());
     }
 
     @Test
     void testDeleteOrderItem() throws Exception {
-        // Perform DELETE request and verify the result
-        mockMvc.perform(delete("/order-items/1"))
-                .andExpect(status().isOk());
+        mockMvc.perform(delete("/api/order-items/1"))
+                .andExpect(status().isNoContent()); // 204 No Content durum kodu beklenir
 
-        // Verify that the delete method was called
         verify(orderItemService).deleteOrderItem(1L);
     }
 }

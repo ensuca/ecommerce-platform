@@ -11,12 +11,12 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Optional;
-
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
+
+
+import java.util.*;
+import java.time.LocalDateTime;
 
 @SpringBootTest
 class OrderServiceTest {
@@ -43,6 +43,7 @@ class OrderServiceTest {
         order.setUserId(1L);
         order.setProductId(1L);
         order.setQuantity(10);
+        order.setOrderItems((ArrayList<Object>) new ArrayList<>());
         order.setOrderDate(LocalDateTime.now());
         order.setStatus("PENDING");
 
@@ -77,19 +78,53 @@ class OrderServiceTest {
 
     @Test
     void testAddOrderItem() {
-        // Mock repository to return the added order item
+        // Arrange
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(orderItemRepository.save(any(OrderItem.class))).thenReturn(orderItem);
+        when(orderRepository.save(any(Order_.class))).thenReturn(order);
 
-        // Add an order item and verify the result
-        OrderItem addedOrderItem = orderService.addOrderItem(1L, orderItem);
-        assertNotNull(addedOrderItem);
-        assertEquals(orderItem.getId(), addedOrderItem.getId());
+        // Act
+        OrderItem result = orderService.addOrderItem(1L, orderItem);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1L, result.getOrderId());
+        assertEquals(1L, result.getProductId());
+        assertEquals(5, result.getQuantity());
+        verify(orderRepository).findById(1L);
+        verify(orderItemRepository).save(any(OrderItem.class));
+        verify(orderRepository).save(any(Order_.class));
+        assertEquals(1, order.getOrderItems().size());
+        assertTrue(order.getOrderItems().contains(orderItem));
+    }
+
+    @Test
+    void testAddOrderItemOrderNotFound() {
+        // Arrange
+        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+
+        // Act
+        OrderItem result = orderService.addOrderItem(1L, orderItem);
+
+        // Assert
+        assertNull(result);
+        verify(orderRepository).findById(1L);
+        verify(orderItemRepository, never()).save(any(OrderItem.class));
+        verify(orderRepository, never()).save(any(Order_.class));
     }
 
     @Test
     void testRemoveOrderItem() {
-        // Perform remove operation and verify the result
+        // Arrange
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        doNothing().when(orderItemRepository).deleteById(1L);
+
+        // Act
         orderService.removeOrderItem(1L, 1L);
+
+        // Assert
         verify(orderItemRepository).deleteById(1L);
+        verify(orderRepository).findById(1L);
+        verify(orderRepository).save(order);
     }
 }

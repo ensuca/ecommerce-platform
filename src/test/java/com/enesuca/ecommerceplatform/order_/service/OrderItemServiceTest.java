@@ -71,12 +71,39 @@ class OrderItemServiceTest {
 
     @Test
     void testUpdateOrderItem() {
-        // Mock repository to return the updated order item
-        when(orderItemRepository.save(orderItem)).thenReturn(orderItem);
+        // Arrange
+        OrderItem updatedOrderItem = new OrderItem();
+        updatedOrderItem.setId(1L);
+        updatedOrderItem.setOrderId(1L);
+        updatedOrderItem.setProductId(1L);
+        updatedOrderItem.setQuantity(10);
 
-        // Update an order item and verify the result
-        OrderItem updatedOrderItem = orderItemService.updateOrderItem(orderItem.getId(), orderItem);
-        assertEquals(orderItem.getId(), updatedOrderItem.getId());
+        when(orderItemRepository.findById(1L)).thenReturn(Optional.of(orderItem));
+        when(orderItemRepository.save(any(OrderItem.class))).thenReturn(updatedOrderItem);
+
+        // Act
+        OrderItem result = orderItemService.updateOrderItem(1L, updatedOrderItem);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1L, result.getId());
+        assertEquals(10, result.getQuantity());
+        verify(orderItemRepository).findById(1L);
+        verify(orderItemRepository).save(any(OrderItem.class));
+    }
+
+    @Test
+    void testUpdateOrderItemNotFound() {
+        // Arrange
+        when(orderItemRepository.findById(1L)).thenReturn(Optional.empty());
+
+        // Act
+        OrderItem result = orderItemService.updateOrderItem(1L, new OrderItem());
+
+        // Assert
+        assertNull(result);
+        verify(orderItemRepository).findById(1L);
+        verify(orderItemRepository, never()).save(any(OrderItem.class));
     }
 
     @Test

@@ -31,11 +31,14 @@ public class OrderItemService {
 
     // Update an existing order item
     public OrderItem updateOrderItem(Long id, OrderItem orderItem) {
-        if (orderItemRepository.existsById(id)) {
-            orderItem.setId(id);
-            return orderItemRepository.save(orderItem);
-        }
-        return null;
+        return orderItemRepository.findById(id)
+                .map(existingItem -> {
+                    existingItem.setOrderId(orderItem.getOrderId());
+                    existingItem.setProductId(orderItem.getProductId());
+                    existingItem.setQuantity(orderItem.getQuantity());
+                    return orderItemRepository.save(existingItem);
+                })
+                .orElse(null);
     }
 
     // Delete an order item by ID

@@ -5,6 +5,7 @@ import com.enesuca.ecommerceplatform.order_.model.OrderItem;
 import com.enesuca.ecommerceplatform.order_.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,7 +29,7 @@ public class OrderController {
         return ResponseEntity.ok(orders);
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Order_> createOrder(@RequestBody CreateOrderRequest createOrderRequest) {
         Order_ createdOrder = orderService.createOrder(createOrderRequest.getOrder(), createOrderRequest.getOrderItems());
         return ResponseEntity.status(HttpStatus.CREATED).body(createdOrder);
@@ -41,7 +42,7 @@ public class OrderController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Order_> updateOrder(@PathVariable Long id, @RequestBody Order_ order) {
         Order_ updatedOrder = orderService.updateOrder(id, order);
         return ResponseEntity.ok(updatedOrder);
