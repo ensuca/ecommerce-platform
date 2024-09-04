@@ -9,7 +9,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -18,7 +21,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.*;
 import java.time.LocalDateTime;
 
-@SpringBootTest
+@DataJpaTest
+@ExtendWith(MockitoExtension.class)
 class OrderServiceTest {
 
     @InjectMocks
@@ -43,7 +47,7 @@ class OrderServiceTest {
         order.setUserId(1L);
         order.setProductId(1L);
         order.setQuantity(10);
-        order.setOrderItems((ArrayList<Object>) new ArrayList<>());
+        order.setOrderItems(new ArrayList<>());
         order.setOrderDate(LocalDateTime.now());
         order.setStatus("PENDING");
 
